@@ -12,19 +12,40 @@ def hello_world():
 
 
 @app.route("/processo", methods=["GET"])
-def get_site():
+def get_processo_info():
     content_type = request.headers.get("Content-Type")
     if not _is_valid_content_type(content_type):
         print("not valid content type")
         return "Cannot parse content type"
 
     json_data = request.get_json(request.data)
-    num_processo = json_data.get("numProcesso")
-    print(json_data)
+    processo = json_data.get("numProcesso")
+    numero_digito, ano, jud, trib, origem = processo.split(".")
+    jtr_code = jud + "." + trib
 
-    r = requests.get("https://www2.tjal.jus.br/cpopg/open.do")
-    return crawler.get_title(r.text)
+    response = ""
+    for website in _correct_tribunal_website(jtr_code):
+        print(website)
+        r = requests.get(website)
+        response += crawler.get_title(r.text)
+
+    return response
 
 
 def _is_valid_content_type(incoming):
     return incoming == "application/json"
+
+
+def _correct_tribunal_website(jtr_code):
+    known_tribunal = {
+        "8.02": [
+            "https://www2.tjal.jus.br/cpopg/open.do",
+            "https://www2.tjal.jus.br/cposg5/open.do",
+        ],
+        "8.12": [
+            "https://esaj.tjms.jus.br/cpopg5/open.do",
+            "ttps://esaj.tjms.jus.br/cposg5/open.do",
+        ]
+    }
+
+    return known_tribunal.get(jtr_code, "Invalid code")
