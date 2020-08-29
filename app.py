@@ -24,7 +24,10 @@ def get_processo_info():
     jtr_code = jud + "." + trib
 
     response = ""
-    for website in _correct_tribunal_website(jtr_code):
+    websites = _correct_tribunal_website(jtr_code)
+    if websites == "Invalid code": # TODO raise exception
+        return "Could not find this process"
+    for website in websites:
         print(website)
         r = requests.get(website)
         response += crawler.get_title(r.text)
