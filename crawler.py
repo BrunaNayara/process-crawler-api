@@ -40,18 +40,53 @@ def get_info_table(soup):
         print(i, data[i])
     return data
 
-def get_participants(html):
+def get_participants(soup):
     participants_table = soup.find(id="tableTodasPartes")
     participants_table = clean_html(participants_table)
-    participants_table = remove_whitespaces(only_text(participants_table))
-    for p in participants_table:
-        print(p)
+    participants_list = remove_whitespaces(only_text(participants_table))
 
-    return "a"
+    participants = {
+        'autores': {
+            'partes': [],
+            'advogados': [],
+        },
+        'reus': {
+            'partes': [],
+            'advogados': [],
+        }
+    }
+
+    autor = ['autor', 'autora']
+    reu = ['ré', 'réu']
+    adv = ['advogado', 'advogada']
+    autores = []
+
+    it = iter(participants_list)
+    last_participant = None
+    for p in it:
+        p = p.lower().strip(':')
+        if p in autor:
+            participants['autores']['partes'].append(next(it))
+            last_participant = 'autor'
+
+        elif p in reu:
+            participants['reus']['partes'].append(next(it))
+            last_participant = 'réu'
+
+        elif p in adv:
+            if last_participant in autor:
+                participants['autores']['advogados'].append(next(it))
+            if last_participant in reu:
+                participants['reus']['advogados'].append(next(it))
+
+    return participants
 
 def get_all_important_info(html):
     soup = BeautifulSoup(html, 'html.parser')
-    return get_info_table(soup)
+    basic_info = get_info_table(soup)
+    participants = get_participants(soup)
+    all_data = {**basic_info, **participants}
+    return all_data
 
 
 def important_attributes():
