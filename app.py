@@ -6,6 +6,11 @@ import crawler
 app = Flask(__name__)
 
 
+@app.route("/crawl")
+def get_process():
+    r = requests.get("https://www2.tjal.jus.br/cpopg/show.do?processo.codigo=01000O7550000&processo.foro=1&uuidCaptcha=sajcaptcha_3065571f7e764a90a8d55727251b85c2")
+    return crawler.get_info_table(r.text)
+
 @app.route("/")
 def hello_world():
     return "Starting our API."
@@ -27,6 +32,7 @@ def get_processo_info():
     websites = _correct_tribunal_website(jtr_code)
     if websites == "Invalid code": # TODO raise exception
         return "Could not find this process"
+
     for website in websites:
         print(website)
         r = requests.get(website)
