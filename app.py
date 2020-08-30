@@ -3,6 +3,8 @@ from flask import request
 import requests
 import crawler
 
+from tribunal_crawler import TribunalCrawler
+
 app = Flask(__name__)
 
 
@@ -12,7 +14,7 @@ def get_process(grau):
         r = requests.get("https://www2.tjal.jus.br/cpopg/show.do?processo.codigo=01000O7550000&processo.foro=1&uuidCaptcha=sajcaptcha_3065571f7e764a90a8d55727251b85c2")
     else:
         r = requests.get("https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado=0806233-85.2019&foroNumeroUnificado=0000&dePesquisaNuUnificado=0806233-85.2019.8.02.0000&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar")
-    return crawler.get_all_important_info(r.text)
+    return TribunalCrawler().get_all_important_info(r.text)
 
 @app.route("/")
 def hello_world():
