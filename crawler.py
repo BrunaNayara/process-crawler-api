@@ -81,11 +81,26 @@ def get_participants(soup):
 
     return participants
 
+def get_activity(soup):
+    activity_table = soup.find(id="tabelaTodasMovimentacoes")
+    activity_table = clean_html(activity_table)
+    activity_list = remove_whitespaces(only_text(activity_table))
+    print(activity_list)
+    print(len(activity_list))
+    it = iter(activity_list)
+    activity = [(date, next(it)) for date  in it]
+    print(activity)
+
+
+    return "a"
+
+
 def get_all_important_info(html):
     soup = BeautifulSoup(html, 'html.parser')
     basic_info = get_info_table(soup)
     participants = get_participants(soup)
     all_data = {**basic_info, **participants}
+    get_activity(soup)
     return all_data
 
 
