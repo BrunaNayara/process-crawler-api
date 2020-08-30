@@ -1,4 +1,4 @@
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup, Comment, Tag
 
 
 def clean_html(html):
@@ -41,7 +41,7 @@ def get_info_table(soup):
     return data
 
 def get_participants(soup):
-    participants_table = soup.find(id="tableTodasPartes")
+    participants_table = soup.find(id="tableTodasPartes") or soup.find(id="tablePartesPrincipais")
     participants_table = clean_html(participants_table)
     participants_list = remove_whitespaces(only_text(participants_table))
 
@@ -82,25 +82,33 @@ def get_participants(soup):
     return participants
 
 def get_activity(soup):
-    activity_table = soup.find(id="tabelaTodasMovimentacoes")
+    activity_table = soup.find(id="tabelaTodasMovimentacoes") or soup.find(id="tabelaUltimasMovimentacoes")
     activity_table = clean_html(activity_table)
-    activity_list = remove_whitespaces(only_text(activity_table))
-    print(activity_list)
-    print(len(activity_list))
-    it = iter(activity_list)
-    activity = [(date, next(it)) for date  in it]
-    print(activity)
 
+    activity = []
+    for tr in activity_table:
+        if isinstance(tr, Tag):
+            td_list = tr.find_all('td')
+            print(td_list)
 
-    return "a"
+            date = td_list[0].text.strip()
+            content = remove_whitespaces(only_text(td_list[-1]))[0]
+
+            activity.append((date, content))
+
+    return activity
 
 
 def get_all_important_info(html):
     soup = BeautifulSoup(html, 'html.parser')
     basic_info = get_info_table(soup)
     participants = get_participants(soup)
-    all_data = {**basic_info, **participants}
-    get_activity(soup)
+    activity = get_activity(soup)
+    all_data = {
+        'dados do processo': basic_info,
+        'partes': participants,
+        'movimentacoes': activity,
+    }
     return all_data
 
 
