@@ -24,8 +24,7 @@ def get_table(html):
     table_data = soup.findAll("table", "secaoFormBody")[1]
     return table_data
 
-def get_info_table(html):
-    soup = BeautifulSoup(html, 'html.parser')
+def get_info_table(soup):
     table_data = soup.findAll("table", "secaoFormBody")[1]
     clean_table = clean_html(table_data)
     info_list = remove_whitespaces(only_text(clean_table))
@@ -34,12 +33,26 @@ def get_info_table(html):
     data = {}
     it = iter(info_list)
     for key in it:
-        if key.strip(':').lower() in important_attributes():
+        if key.strip(':').lower().strip() in important_attributes():
             data[key] = next(it)
 
     for i in data.keys():
         print(i, data[i])
     return data
+
+def get_participants(html):
+    participants_table = soup.find(id="tableTodasPartes")
+    participants_table = clean_html(participants_table)
+    participants_table = remove_whitespaces(only_text(participants_table))
+    for p in participants_table:
+        print(p)
+
+    return "a"
+
+def get_all_important_info(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    return get_info_table(soup)
+
 
 def important_attributes():
     return [
