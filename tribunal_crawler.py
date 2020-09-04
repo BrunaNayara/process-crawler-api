@@ -2,9 +2,8 @@ from bs4 import BeautifulSoup, Comment, Tag
 import crawler
 
 class TribunalCrawler:
-    def __init__(self):
-        # self.websites = websites
-        pass
+    def __init__(self, websites):
+        self.websites = websites
 
     def get_all_important_info(self, html):
         soup = BeautifulSoup(html, 'html.parser')

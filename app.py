@@ -11,10 +11,10 @@ app = Flask(__name__)
 @app.route("/crawl/<int:grau>")
 def get_process(grau):
     if grau == 1:
-        r = requests.get("https://www2.tjal.jus.br/cpopg/show.do?processo.codigo=01000O7550000&processo.foro=1&uuidCaptcha=sajcaptcha_3065571f7e764a90a8d55727251b85c2")
+        r = requests.get("https://www2.tjal.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado=0710802-55.2018&foroNumeroUnificado=0001&dadosConsulta.valorConsultaNuUnificado=0710802-55.2018.8.02.0001&dadosConsulta.valorConsulta=&uuidCaptcha=")
     else:
         r = requests.get("https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado=0806233-85.2019&foroNumeroUnificado=0000&dePesquisaNuUnificado=0806233-85.2019.8.02.0000&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar")
-    return TribunalCrawler().get_all_important_info(r.text)
+    return TribunalCrawler(_correct_tribunal_website("8.02")).get_all_important_info(r.text)
 
 @app.route("/")
 def hello_world():
@@ -33,15 +33,18 @@ def get_processo_info():
     numero_digito, ano, jud, trib, origem = processo.split(".")
     jtr_code = jud + "." + trib
 
-    response = ""
     websites = _correct_tribunal_website(jtr_code)
     if websites == "Invalid code": # TODO raise exception
         return "Could not find this process"
 
-    for website in websites:
+    response = ""
+    tribunal_crawler = TribunalCrawler(websites)
+    for website in tribunal_crawler.websites:
+        website = website.format(numero_digito=numero_digito, ano=ano, origem=origem, processo=processo)
         print(website)
         r = requests.get(website)
-        response += crawler.get_title(r.text)
+        response += tribunal_crawler.get_all_important_info(r.text)
+        print(response)
 
     return response
 
@@ -53,8 +56,8 @@ def _is_valid_content_type(incoming):
 def _correct_tribunal_website(jtr_code):
     known_tribunal = {
         "8.02": [
-            "https://www2.tjal.jus.br/cpopg/open.do",
-            "https://www2.tjal.jus.br/cposg5/open.do",
+            "https://www2.tjal.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dadosConsulta.valorConsultaNuUnificado={processo}&dadosConsulta.valorConsulta=&uuidCaptcha=",
+            "https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dePesquisaNuUnificado={processo}&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar",
         ],
         "8.12": [
             "https://esaj.tjms.jus.br/cpopg5/open.do",
