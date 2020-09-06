@@ -1,9 +1,24 @@
+import requests
+
 from bs4 import BeautifulSoup, Comment, Tag
 import crawler
 
 class TribunalCrawler:
     def __init__(self):
         self.websites = self._correct_tribunal_website("8.02")
+
+    def extract_data_from_all_graus(self, process_number):
+        response = {}
+        i = 0
+        for website in self.websites:
+            i += 1
+            print("website:" + website)
+            r = requests.get(self.format_request_string(website, process_number))
+            response_info = self.get_all_important_info(r.text)
+            if(response_info):
+                response[i] = response_info
+
+        return response
 
     def get_all_important_info(self, html):
         soup = BeautifulSoup(html, 'html.parser')
@@ -19,6 +34,14 @@ class TribunalCrawler:
             'movimentacoes': activity,
         }
         return all_data
+
+    def format_request_string(self, url, processo):
+        numero_digito, ano, jud, trib, origem = self.get_process_number_info(processo)
+        return url.format(numero_digito=numero_digito, ano=ano, origem=origem, processo=processo)
+
+    def get_process_number_info(self, process_number):
+        numero_digito, ano, jud, trib, origem = process_number.split(".")
+        return numero_digito, ano, jud, trib, origem
 
     def get_basic_attributes(self, soup):
         table_data = soup.findAll("table", "secaoFormBody")[1]
@@ -82,10 +105,8 @@ class TribunalCrawler:
         for tr in activity_table:
             if isinstance(tr, Tag):
                 td_list = tr.find_all('td')
-
                 date = td_list[0].text.strip()
                 content = crawler.remove_whitespaces(crawler.only_text(td_list[-1]))[0]
-
                 activity.append((date, content))
 
         return activity

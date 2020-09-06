@@ -22,15 +22,11 @@ def hello_world():
     return "Starting our API."
 
 
-@app.route("/abc", methods=["GET"])
-def get_processo_info_manager():
-    content_type = request.headers.get("Content-Type")
-    if not _is_valid_content_type(content_type):
-        print("not valid content type")
-        return "Cannot parse content type"
+@app.route("/abc/<processo>", methods=["GET"])
+def get_processo_info_manager(processo):
+    print(processo)
 
     json_data = request.get_json(request.data)
-    processo = json_data.get("numProcesso")
 
     dm = DataManager()
     return dm.get_process_data(processo)
@@ -66,18 +62,3 @@ def get_processo_info():
 
 def _is_valid_content_type(incoming):
     return incoming == "application/json"
-
-
-def _correct_tribunal_website(jtr_code):
-    known_tribunal = {
-        "8.02": [
-            "https://www2.tjal.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dadosConsulta.valorConsultaNuUnificado={processo}&dadosConsulta.valorConsulta=&uuidCaptcha=",
-            "https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dePesquisaNuUnificado={processo}&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar",
-        ],
-        "8.12": [
-            "https://esaj.tjms.jus.br/cpopg5/open.do",
-            "ttps://esaj.tjms.jus.br/cposg5/open.do",
-        ]
-    }
-
-    return known_tribunal.get(jtr_code, "Invalid code")

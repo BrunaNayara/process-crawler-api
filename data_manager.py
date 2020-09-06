@@ -1,3 +1,4 @@
+import re
 import requests
 
 from tribunal_crawler import TribunalCrawler
@@ -8,26 +9,25 @@ class DataManager:
         pass
 
     def get_process_data(self, process_number):
-        tribunal_crawler = TribunalCrawler()
+        if not _is_valid_process_number(process_number):
+            return "Not a valid process number"
 
-        numero_digito, ano, jud, trib, origem = self.get_jtr_code(process_number)
+        jtr = self.get_jtr_code(process_number)
+        tribunal_crawler = self.instatiate_crawler(jtr)
 
-        response = {}
-        i = 0
-        for website in tribunal_crawler.websites:
-            i += 1
-            website = website.format(numero_digito=numero_digito, ano=ano, origem=origem, processo=process_number)
-            print("website:" + website)
-            r = requests.get(website)
-            response_info = tribunal_crawler.get_all_important_info(r.text)
-            if(response_info):
-                response[i] = response_info
-
-
-        return response
+        return tribunal_crawler.extract_data_from_all_graus(process_number)
 
     def get_jtr_code(self, process_number):
         numero_digito, ano, jud, trib, origem = process_number.split(".")
-        return numero_digito, ano, jud, trib, origem
-        # jtr_code = jud + "." + trib
-        # return jtr_code
+        return jud + "." + trib
+
+    def instatiate_crawler(self, jtr):
+        tribunals = {
+            "8.02": TribunalCrawler,
+        }
+
+        return tribunals[jtr]()
+
+    def _is_valid_process_number(self, process_number):
+        process_format_number = re.compile('([0-9]{7})-([0-9]{2}).([0-9]{4}).([0-9]{1}).([0-9]{2}).([0-9]{4})')
+        return bool(process_format_number.match(process_number)
