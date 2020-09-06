@@ -3,6 +3,7 @@ from flask import request
 import requests
 import crawler
 
+from data_manager import DataManager
 from tribunal_crawler import TribunalCrawler
 
 app = Flask(__name__)
@@ -19,6 +20,20 @@ def get_process(grau):
 @app.route("/")
 def hello_world():
     return "Starting our API."
+
+
+@app.route("/abc", methods=["GET"])
+def get_processo_info_manager():
+    content_type = request.headers.get("Content-Type")
+    if not _is_valid_content_type(content_type):
+        print("not valid content type")
+        return "Cannot parse content type"
+
+    json_data = request.get_json(request.data)
+    processo = json_data.get("numProcesso")
+
+    dm = DataManager()
+    return dm.get_process_data(processo)
 
 
 @app.route("/processo", methods=["GET"])

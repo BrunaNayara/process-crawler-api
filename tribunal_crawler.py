@@ -2,11 +2,14 @@ from bs4 import BeautifulSoup, Comment, Tag
 import crawler
 
 class TribunalCrawler:
-    def __init__(self, websites):
-        self.websites = websites
+    def __init__(self):
+        self.websites = self._correct_tribunal_website("8.02")
 
     def get_all_important_info(self, html):
         soup = BeautifulSoup(html, 'html.parser')
+        if not self.found_info(soup):
+            print("Não achou a info")
+            return {}
         basic_info = self.get_basic_attributes(soup)
         participants = self.get_participants(soup)
         activity = self.get_activity(soup)
@@ -34,7 +37,6 @@ class TribunalCrawler:
         participants_table = soup.find(id="tableTodasPartes") or soup.find(id="tablePartesPrincipais")
         participants_table = crawler.clean_html(participants_table)
         participants_list = crawler.remove_whitespaces(crawler.only_text(participants_table))
-        print(participants_list)
 
         participants = {
             'autores': {
@@ -70,7 +72,6 @@ class TribunalCrawler:
                 if last_participant in reu:
                     participants['reus']['advogados'].append(next(it))
 
-        print(participants)
         return participants
 
     def get_activity(self, soup):
@@ -89,6 +90,8 @@ class TribunalCrawler:
 
         return activity
 
+    def found_info(self, soup):
+        return not soup.find(id="mensagemRetorno")
 
     @property
     def important_basic_attributes(self):
@@ -100,3 +103,17 @@ class TribunalCrawler:
             'juiz',
             'valor da ação',
         ]
+
+    def _correct_tribunal_website(self, jtr_code):
+        known_tribunal = {
+            "8.02": [
+                "https://www2.tjal.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dadosConsulta.valorConsultaNuUnificado={processo}&dadosConsulta.valorConsulta=&uuidCaptcha=",
+                "https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dePesquisaNuUnificado={processo}&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar",
+            ],
+            "8.12": [
+                "https://esaj.tjms.jus.br/cpopg5/open.do",
+                "ttps://esaj.tjms.jus.br/cposg5/open.do",
+            ]
+        }
+
+        return known_tribunal.get(jtr_code, "Invalid code")
