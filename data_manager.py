@@ -29,5 +29,7 @@ class DataManager:
         return tribunals[jtr]()
 
     def _is_valid_process_number(self, process_number):
-        process_format_number = re.compile('([0-9]{7})-([0-9]{2}).([0-9]{4}).([0-9]{1}).([0-9]{2}).([0-9]{4})')
+        process_format_number = re.compile(
+            "([0-9]{7})-([0-9]{2}).([0-9]{4}).([0-9]{1}).([0-9]{2}).([0-9]{4})"
+        )
         return bool(process_format_number.match(process_number))

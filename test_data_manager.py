@@ -31,7 +31,6 @@ class TestDataManager(unittest.TestCase):
 
         self.dm.instatiate_crawler.assert_not_called()
 
-
     def test_get_data_valid_process_number(self):
         expected_jtr_code = "1.12"
         mocked_process_number = "1234567-12.1234." + expected_jtr_code + ".1234"
@@ -46,6 +45,5 @@ class TestDataManager(unittest.TestCase):
         self.assertEqual(expected_data, actual)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
