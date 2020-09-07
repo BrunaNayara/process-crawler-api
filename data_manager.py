@@ -9,7 +9,7 @@ class DataManager:
         pass
 
     def get_process_data(self, process_number):
-        if not _is_valid_process_number(process_number):
+        if not self._is_valid_process_number(process_number):
             return "Not a valid process number"
 
         jtr = self.get_jtr_code(process_number)
@@ -30,4 +30,4 @@ class DataManager:
 
     def _is_valid_process_number(self, process_number):
         process_format_number = re.compile('([0-9]{7})-([0-9]{2}).([0-9]{4}).([0-9]{1}).([0-9]{2}).([0-9]{4})')
-        return bool(process_format_number.match(process_number)
+        return bool(process_format_number.match(process_number))

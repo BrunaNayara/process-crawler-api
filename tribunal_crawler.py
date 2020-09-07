@@ -24,7 +24,7 @@ class TribunalCrawler:
         soup = BeautifulSoup(html, 'html.parser')
         if not self.found_info(soup):
             print("Não achou a info")
-            return {}
+            return "No info"
         basic_info = self.get_basic_attributes(soup)
         participants = self.get_participants(soup)
         activity = self.get_activity(soup)
