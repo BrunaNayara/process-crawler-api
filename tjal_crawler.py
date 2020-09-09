@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup, Comment, Tag
 import crawler
 
 
-class TribunalCrawler:
+class TJALCrawler:
     def __init__(self):
         self.websites = self._correct_tribunal_website("8.02")
 

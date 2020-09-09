@@ -1,7 +1,7 @@
 import re
 import requests
 
-from tribunal_crawler import TribunalCrawler
+from tjal_crawler import TJALCrawler
 
 
 class DataManager:
@@ -23,7 +23,7 @@ class DataManager:
 
     def instatiate_crawler(self, jtr):
         tribunals = {
-            "8.02": TribunalCrawler,
+            "8.02": TJALCrawler,
         }
 
         return tribunals[jtr]()
