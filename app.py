@@ -4,7 +4,6 @@ import requests
 import crawler
 
 from data_manager import DataManager
-from tribunal_crawler import TribunalCrawler
 
 app = Flask(__name__)
 
