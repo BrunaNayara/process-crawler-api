@@ -5,8 +5,8 @@ from crawlers import soup_helper, crawler_helper
 
 
 class TJMSCrawler:
-    def __init__(self):
-        self.websites = self._correct_tribunal_website("8.12")
+    def __init__(self, website_code):
+        self.websites = self._correct_tribunal_website(website_code)
         print("TJMS")
 
     def extract_data_from_all_graus(self, process_number):
@@ -21,9 +21,6 @@ class TJMSCrawler:
                 response[i] = response_info
 
         return response
-
-    def first_grau_data(self, html):
-        pass
 
     def get_all_important_info(self, html):
         soup = BeautifulSoup(html, "html.parser")
@@ -93,14 +90,6 @@ class TJMSCrawler:
             "assunto": "assuntoProcesso",
             "juiz": "juizProcesso",
             "área": "areaProcesso",
-            "distribuição": "dataHoraDistribuicaoProcesso",
-            "valor da ação": "valorAcaoProcesso",
-        }
-
-    @property
-    def important_basic_detail_attributes(self):
-        return {
-            "area": "areaProcesso",
             "distribuição": "dataHoraDistribuicaoProcesso",
             "valor da ação": "valorAcaoProcesso",
         }

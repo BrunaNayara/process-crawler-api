@@ -28,7 +28,7 @@ class DataManager:
             "8.12": TJMSCrawler,
         }
 
-        return tribunals[jtr]()
+        return tribunals[jtr](jtr)
 
     def _is_valid_process_number(self, process_number):
         process_format_number = re.compile(

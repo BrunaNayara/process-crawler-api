@@ -5,8 +5,9 @@ from crawlers import soup_helper, crawler_helper
 
 
 class TJALCrawler:
-    def __init__(self):
-        self.websites = self._correct_tribunal_website("8.02")
+    def __init__(self, website_code):
+        self.websites = self._correct_tribunal_website(website_code)
+        print("TJAL")
 
     def extract_data_from_all_graus(self, process_number):
         response = {}
@@ -77,10 +78,6 @@ class TJALCrawler:
             "8.02": [
                 "https://www2.tjal.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dadosConsulta.valorConsultaNuUnificado={processo}&dadosConsulta.valorConsulta=&uuidCaptcha=",
                 "https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dePesquisaNuUnificado={processo}&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar",
-            ],
-            "8.12": [
-                "https://esaj.tjms.jus.br/cpopg5/open.do",
-                "ttps://esaj.tjms.jus.br/cposg5/open.do",
             ],
         }
 
