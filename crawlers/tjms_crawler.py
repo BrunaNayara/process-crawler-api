@@ -58,76 +58,29 @@ class TJMSCrawler:
 
     def get_basic_attributes_without_id(self, soup):
         table_data = soup.findAll("div", "unj-entity-header__summary")[0]
-        clean_table = soup_helper.remove_comments(table_data)
-        info_list = soup_helper.remove_whitespaces(soup_helper.only_text(clean_table))
+        info_list = soup_helper.get_string_list(table_data)
 
         table_data = soup.findAll("div", "unj-entity-header__details")[0]
-        clean_table = soup_helper.remove_comments(table_data)
-        info_list += soup_helper.remove_whitespaces(soup_helper.only_text(clean_table))
+        info_list += soup_helper.get_string_list(table_data)
 
-        data = {}
-        it = iter(info_list)
-        for key in it:
-            if key.strip(":").lower().strip() in self.important_basic_attributes:
-                data[key] = next(it)
-
-        return data
-
-
+        info_list = soup_helper.get_string_list(table_data)
+        attributes = crawler_helper.map_data(info_list, self.important_basic_attributes)
+        return attributes
 
     def get_participants(self, soup):
-        participants_table = soup.find(id="tableTodasPartes") or soup.find(
-            id="tablePartesPrincipais"
+        participants_table = soup_helper.find_any_from_id(soup,
+            "tableTodasPartes", "tablePartesPrincipais"
         )
-        participants_table = soup_helper.remove_comments(participants_table)
-        participants_list = soup_helper.remove_whitespaces(
-            soup_helper.only_text(participants_table)
-        )
-
-        participants = {
-            "autores": {"partes": [], "advogados": [],},
-            "reus": {"partes": [], "advogados": [],},
-        }
-
-        autor = ["autor", "autora", "agravante", "apelante"]
-        reu = ["ré", "réu", "agravado", "apelado"]
-        adv = ["advogado", "advogada", "repreleg"]
-        autores = []
-
-        it = iter(participants_list)
-        last_participant = None
-        for p in it:
-            p = p.lower().strip(":")
-            if p in autor:
-                participants["autores"]["partes"].append(next(it))
-                last_participant = "autor"
-
-            elif p in reu:
-                participants["reus"]["partes"].append(next(it))
-                last_participant = "réu"
-
-            elif p in adv:
-                if last_participant in autor:
-                    participants["autores"]["advogados"].append(next(it))
-                if last_participant in reu:
-                    participants["reus"]["advogados"].append(next(it))
-
-        return participants
+        participants_list = soup_helper.get_string_list(participants_table)
+        participants = crawler_helper.get_participants(participants_list)
+        return participants_list
 
     def get_activity(self, soup):
-        activity_table = soup.find(id="tabelaTodasMovimentacoes") or soup.find(
-            id="tabelaUltimasMovimentacoes"
+        activity_table = soup_helper.find_any_from_id(soup,
+            "tabelaTodasMovimentacoes", "tabelaUltimasMovimentacoes"
         )
         activity_table = soup_helper.remove_comments(activity_table)
-
-        activity = []
-        for tr in activity_table:
-            if isinstance(tr, Tag):
-                td_list = tr.find_all("td")
-                date = td_list[0].text.strip()
-                content = soup_helper.remove_whitespaces(soup_helper.only_text(td_list[-1]))[0]
-                activity.append((date, content))
-
+        activity = crawler_helper.get_activity(activity_table)
         return activity
 
     def found_info(self, soup):
