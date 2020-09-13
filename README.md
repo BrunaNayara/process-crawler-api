@@ -1,17 +1,23 @@
 # process-crawler-api
 
-Using virtualenv 
+## Setup
 ```
 pip3 install -r requirements.txt
 ```
 
-To run
+## Running
 ```
 flask run
 ```
 
-To make a request
+## Making a request
+
+This is an example of a request.
 ```
 curl --header "Content-Type: application/json" --request GET --data '{"numProcesso": "0710802-55.2018.8.02.0001"}'   http://127.0.0.1:5000/processo
 ```
-Example of a request
+
+## Running the tests
+```
+python -m unittest
+```
