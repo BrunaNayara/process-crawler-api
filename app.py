@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import request
 import requests
-import crawler
 
 from data_manager import DataManager
 

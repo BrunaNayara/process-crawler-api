@@ -1,8 +1,8 @@
 import re
 import requests
 
-from tjal_crawler import TJALCrawler
-from tjms_crawler import TJMSCrawler
+from crawlers.tjal_crawler import TJALCrawler
+from crawlers.tjms_crawler import TJMSCrawler
 
 
 class DataManager:

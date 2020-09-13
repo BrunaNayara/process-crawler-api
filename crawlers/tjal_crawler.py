@@ -1,13 +1,12 @@
 import requests
 
 from bs4 import BeautifulSoup, Comment, Tag
-import crawler
+from crawlers import crawler
 
 
-class TJMSCrawler:
+class TJALCrawler:
     def __init__(self):
-        self.websites = self._correct_tribunal_website("8.12")
-        print("TJMS")
+        self.websites = self._correct_tribunal_website("8.02")
 
     def extract_data_from_all_graus(self, process_number):
         response = {}
@@ -27,7 +26,7 @@ class TJMSCrawler:
         if not self.found_info(soup):
             print("Não achou a info")
             return "No info"
-        basic_info = self.get_basic_attributes_without_id(soup)
+        basic_info = self.get_basic_attributes(soup)
         participants = self.get_participants(soup)
         activity = self.get_activity(soup)
         all_data = {
@@ -48,29 +47,9 @@ class TJMSCrawler:
         return numero_digito, ano, jud, trib, origem
 
     def get_basic_attributes(self, soup):
-        data = {}
-        basic_data_soup = soup.find(id="containerDadosPrincipaisProcesso")
-
-        for item in self.important_basic_attributes:
-            attribute = basic_data_soup.find(id=self.important_basic_attributes[item])
-            data[item] = crawler.remove_whitespaces(crawler.only_text(attribute))[0]
-
-        basic_detail_soup = soup.find(id="maisDetalhes")
-        for item in self.important_basic_detail_attributes:
-            attribute = basic_detail_soup.find(id=self.important_basic_detail_attributes[item])
-            data[item] = crawler.remove_whitespaces(crawler.only_text(attribute))[0]
-
-        print(data)
-        return data
-
-    def get_basic_attributes_without_id(self, soup):
-        table_data = soup.findAll("div", "unj-entity-header__summary")[0]
+        table_data = soup.findAll("table", "secaoFormBody")[1]
         clean_table = crawler.clean_html(table_data)
         info_list = crawler.remove_whitespaces(crawler.only_text(clean_table))
-
-        table_data = soup.findAll("div", "unj-entity-header__details")[0]
-        clean_table = crawler.clean_html(table_data)
-        info_list += crawler.remove_whitespaces(crawler.only_text(clean_table))
 
         data = {}
         it = iter(info_list)
@@ -79,8 +58,6 @@ class TJMSCrawler:
                 data[key] = next(it)
 
         return data
-
-
 
     def get_participants(self, soup):
         participants_table = soup.find(id="tableTodasPartes") or soup.find(
@@ -96,9 +73,9 @@ class TJMSCrawler:
             "reus": {"partes": [], "advogados": [],},
         }
 
-        autor = ["autor", "autora", "agravante", "apelante"]
-        reu = ["ré", "réu", "agravado", "apelado"]
-        adv = ["advogado", "advogada", "repreleg"]
+        autor = ["autor", "autora", "agravante"]
+        reu = ["ré", "réu", "agravado"]
+        adv = ["advogado", "advogada"]
         autores = []
 
         it = iter(participants_list)
@@ -142,28 +119,24 @@ class TJMSCrawler:
 
     @property
     def important_basic_attributes(self):
-        return {
-            "classe": "classeProcesso",
-            "assunto": "assuntoProcesso",
-            "juiz": "juizProcesso",
-            "área": "areaProcesso",
-            "distribuição": "dataHoraDistribuicaoProcesso",
-            "valor da ação": "valorAcaoProcesso",
-        }
-
-    @property
-    def important_basic_detail_attributes(self):
-        return {
-            "area": "areaProcesso",
-            "distribuição": "dataHoraDistribuicaoProcesso",
-            "valor da ação": "valorAcaoProcesso",
-        }
+        return [
+            "classe",
+            "área",
+            "assunto",
+            "distribuição",
+            "juiz",
+            "valor da ação",
+        ]
 
     def _correct_tribunal_website(self, jtr_code):
         known_tribunal = {
+            "8.02": [
+                "https://www2.tjal.jus.br/cpopg/search.do?conversationId=&dadosConsulta.localPesquisa.cdLocal=-1&cbPesquisa=NUMPROC&dadosConsulta.tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dadosConsulta.valorConsultaNuUnificado={processo}&dadosConsulta.valorConsulta=&uuidCaptcha=",
+                "https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=1&cbPesquisa=NUMPROC&tipoNuProcesso=UNIFICADO&numeroDigitoAnoUnificado={numero_digito}.{ano}&foroNumeroUnificado={origem}&dePesquisaNuUnificado={processo}&dePesquisa=&uuidCaptcha=&pbEnviar=Pesquisar",
+            ],
             "8.12": [
-                #"https://esaj.tjms.jus.br/cpopg5/show.do?processo.codigo=01001ZB2W0000&processo.foro=1&processo.numero=0821901-51.2018.8.12.0001&uuidCaptcha=sajcaptcha_46b010cc16294f7e81e3cc1fc37f7d0c",
-                "https://esaj.tjms.jus.br/cposg5/search.do?conversationId=&paginaConsulta=0&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado=0821901-51.2018&foroNumeroUnificado=0001&dePesquisaNuUnificado=0821901-51.2018.8.12.0001&dePesquisaNuUnificado=UNIFICADO&dePesquisa=&tipoNuProcesso=UNIFICADO",
+                "https://esaj.tjms.jus.br/cpopg5/open.do",
+                "ttps://esaj.tjms.jus.br/cposg5/open.do",
             ],
         }
 
