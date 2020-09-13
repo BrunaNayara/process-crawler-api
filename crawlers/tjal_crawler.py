@@ -48,7 +48,7 @@ class TJALCrawler:
 
         participants_list = soup_helper.get_string_list(participants_table)
         participants = crawler_helper.get_participants(participants_list)
-        return participants_list
+        return participants
 
     def get_activity(self, soup):
         activity_table = soup_helper.find_any_from_id(soup,

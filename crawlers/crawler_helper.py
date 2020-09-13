@@ -40,9 +40,9 @@ def get_participants(participants_list):
         "reus": {"partes": [], "advogados": [],},
     }
 
-    autor = ["autor", "autora", "agravante"]
-    reu = ["ré", "réu", "agravado"]
-    adv = ["advogado", "advogada"]
+    autor = ["autor", "autora", "agravante", "apelante"]
+    reu = ["ré", "réu", "agravado", "apelado"]
+    adv = ["advogado", "advogada", "repreleg", "proc. do estado"]
     autores = []
 
     it = iter(participants_list)
@@ -62,5 +62,4 @@ def get_participants(participants_list):
                 participants["autores"]["advogados"].append(next(it))
             if last_participant in reu:
                 participants["reus"]["advogados"].append(next(it))
-
     return participants
