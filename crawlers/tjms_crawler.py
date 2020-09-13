@@ -40,27 +40,21 @@ class TJMSCrawler:
     def get_basic_attributes(self, soup):
         data = {}
         basic_data_soup = soup.find(id="containerDadosPrincipaisProcesso")
+        basic_detail_soup = soup.find(id="maisDetalhes")
+        basic_data_soup.insert(1, basic_detail_soup)
 
         for item in self.important_basic_attributes:
             attribute = basic_data_soup.find(id=self.important_basic_attributes[item])
             data[item] = soup_helper.remove_whitespaces(soup_helper.only_text(attribute))[0]
 
-        basic_detail_soup = soup.find(id="maisDetalhes")
-        for item in self.important_basic_detail_attributes:
-            attribute = basic_detail_soup.find(id=self.important_basic_detail_attributes[item])
-            data[item] = soup_helper.remove_whitespaces(soup_helper.only_text(attribute))[0]
-
-        print(data)
         return data
 
     def get_basic_attributes_without_id(self, soup):
-        table_data = soup.findAll("div", "unj-entity-header__summary")[0]
-        info_list = soup_helper.get_string_list(table_data)
+        table_data_1 = soup.findAll("div", "unj-entity-header__summary")[0]
+        table_data_2 = soup.findAll("div", "unj-entity-header__details")[0]
+        table_data_1.insert(1, table_data_2)
 
-        table_data = soup.findAll("div", "unj-entity-header__details")[0]
-        info_list += soup_helper.get_string_list(table_data)
-
-        info_list = soup_helper.get_string_list(table_data)
+        info_list = soup_helper.get_string_list(table_data_1)
         attributes = crawler_helper.map_data(info_list, self.important_basic_attributes)
         return attributes
 
