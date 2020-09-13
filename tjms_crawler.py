@@ -27,7 +27,7 @@ class TJMSCrawler:
         if not self.found_info(soup):
             print("Não achou a info")
             return "No info"
-        basic_info = self.get_basic_attributes(soup)
+        basic_info = self.get_basic_attributes_without_id(soup)
         participants = self.get_participants(soup)
         activity = self.get_activity(soup)
         all_data = {
@@ -63,6 +63,25 @@ class TJMSCrawler:
         print(data)
         return data
 
+    def get_basic_attributes_without_id(self, soup):
+        table_data = soup.findAll("div", "unj-entity-header__summary")[0]
+        clean_table = crawler.clean_html(table_data)
+        info_list = crawler.remove_whitespaces(crawler.only_text(clean_table))
+
+        table_data = soup.findAll("div", "unj-entity-header__details")[0]
+        clean_table = crawler.clean_html(table_data)
+        info_list += crawler.remove_whitespaces(crawler.only_text(clean_table))
+
+        data = {}
+        it = iter(info_list)
+        for key in it:
+            if key.strip(":").lower().strip() in self.important_basic_attributes:
+                data[key] = next(it)
+
+        return data
+
+
+
     def get_participants(self, soup):
         participants_table = soup.find(id="tableTodasPartes") or soup.find(
             id="tablePartesPrincipais"
@@ -77,8 +96,8 @@ class TJMSCrawler:
             "reus": {"partes": [], "advogados": [],},
         }
 
-        autor = ["autor", "autora", "agravante"]
-        reu = ["ré", "réu", "agravado"]
+        autor = ["autor", "autora", "agravante", "apelante"]
+        reu = ["ré", "réu", "agravado", "apelado"]
         adv = ["advogado", "advogada", "repreleg"]
         autores = []
 
@@ -127,8 +146,11 @@ class TJMSCrawler:
             "classe": "classeProcesso",
             "assunto": "assuntoProcesso",
             "juiz": "juizProcesso",
-
+            "área": "areaProcesso",
+            "distribuição": "dataHoraDistribuicaoProcesso",
+            "valor da ação": "valorAcaoProcesso",
         }
+
     @property
     def important_basic_detail_attributes(self):
         return {
@@ -140,8 +162,8 @@ class TJMSCrawler:
     def _correct_tribunal_website(self, jtr_code):
         known_tribunal = {
             "8.12": [
-                "https://esaj.tjms.jus.br/cpopg5/show.do?processo.codigo=01001ZB2W0000&processo.foro=1&processo.numero=0821901-51.2018.8.12.0001&uuidCaptcha=sajcaptcha_46b010cc16294f7e81e3cc1fc37f7d0c",
-                #"https://esaj.tjms.jus.br/cposg5/search.do?conversationId=&paginaConsulta=0&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado=0821901-51.2018&foroNumeroUnificado=0001&dePesquisaNuUnificado=0821901-51.2018.8.12.0001&dePesquisaNuUnificado=UNIFICADO&dePesquisa=&tipoNuProcesso=UNIFICADO",
+                #"https://esaj.tjms.jus.br/cpopg5/show.do?processo.codigo=01001ZB2W0000&processo.foro=1&processo.numero=0821901-51.2018.8.12.0001&uuidCaptcha=sajcaptcha_46b010cc16294f7e81e3cc1fc37f7d0c",
+                "https://esaj.tjms.jus.br/cposg5/search.do?conversationId=&paginaConsulta=0&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado=0821901-51.2018&foroNumeroUnificado=0001&dePesquisaNuUnificado=0821901-51.2018.8.12.0001&dePesquisaNuUnificado=UNIFICADO&dePesquisa=&tipoNuProcesso=UNIFICADO",
             ],
         }
 
