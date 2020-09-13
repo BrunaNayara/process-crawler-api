@@ -1,7 +1,7 @@
 import requests
 
 from bs4 import BeautifulSoup, Comment, Tag
-from crawlers import crawler
+from crawlers import soup_helper, crawler_helper
 
 
 class TJALCrawler:
@@ -14,7 +14,7 @@ class TJALCrawler:
         for website in self.websites:
             i += 1
             print("website:" + website)
-            r = requests.get(self.format_request_string(website, process_number))
+            r = requests.get(crawler_helper.format_request_string(website, process_number))
             response_info = self.get_all_important_info(r.text)
             if response_info:
                 response[i] = response_info
@@ -36,20 +36,10 @@ class TJALCrawler:
         }
         return all_data
 
-    def format_request_string(self, url, processo):
-        numero_digito, ano, jud, trib, origem = self.get_process_number_info(processo)
-        return url.format(
-            numero_digito=numero_digito, ano=ano, origem=origem, processo=processo
-        )
-
-    def get_process_number_info(self, process_number):
-        numero_digito, ano, jud, trib, origem = process_number.split(".")
-        return numero_digito, ano, jud, trib, origem
-
     def get_basic_attributes(self, soup):
         table_data = soup.findAll("table", "secaoFormBody")[1]
-        clean_table = crawler.clean_html(table_data)
-        info_list = crawler.remove_whitespaces(crawler.only_text(clean_table))
+        clean_table = soup_helper.remove_comments(table_data)
+        info_list = soup_helper.remove_whitespaces(soup_helper.only_text(clean_table))
 
         data = {}
         it = iter(info_list)
@@ -63,9 +53,9 @@ class TJALCrawler:
         participants_table = soup.find(id="tableTodasPartes") or soup.find(
             id="tablePartesPrincipais"
         )
-        participants_table = crawler.clean_html(participants_table)
-        participants_list = crawler.remove_whitespaces(
-            crawler.only_text(participants_table)
+        participants_table = soup_helper.remove_comments(participants_table)
+        participants_list = soup_helper.remove_whitespaces(
+            soup_helper.only_text(participants_table)
         )
 
         participants = {
@@ -102,14 +92,14 @@ class TJALCrawler:
         activity_table = soup.find(id="tabelaTodasMovimentacoes") or soup.find(
             id="tabelaUltimasMovimentacoes"
         )
-        activity_table = crawler.clean_html(activity_table)
+        activity_table = soup_helper.remove_comments(activity_table)
 
         activity = []
         for tr in activity_table:
             if isinstance(tr, Tag):
                 td_list = tr.find_all("td")
                 date = td_list[0].text.strip()
-                content = crawler.remove_whitespaces(crawler.only_text(td_list[-1]))[0]
+                content = soup_helper.remove_whitespaces(soup_helper.only_text(td_list[-1]))[0]
                 activity.append((date, content))
 
         return activity
